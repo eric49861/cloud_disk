@@ -1,0 +1,75 @@
+syntax = "v1"
+
+info (
+	title: "云盘存储的网关"
+	desc: "基于腾讯云COS实现一个网盘，为用户提供云存储功能"
+	author: "eric"
+	email: "15854168262@qq.com"
+)
+
+// 注册请求请求响应结构
+type (
+	RegisterRequest {
+		Name     string `json:"name"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
+		Code     string `json:"code"`
+	}
+
+	RegisterResponse {
+		Msg string `json:"msg"`
+	}
+)
+
+// 登录请求响应结构
+type (
+	LoginRequest {
+		Name     string `json:"name"`
+		Password string `json:"password"`
+	}
+
+	LoginResponse {
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
+	}
+)
+
+// 用户详情请求响应结构
+type (
+	UserDetailRequest {
+		UUID string `path:"uuid"`
+	}
+
+	UserDetailResponse {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+)
+
+// 邮箱验证码请求响应结构
+type (
+	EmailCodeRequest {
+		Email string `json:"email"`
+	}
+
+	EmailCodeResponse {
+		Msg string `json:"msg"`
+	}
+)
+
+@server(
+	group: user
+)
+service clouddisk-api {
+	@handler RegisterHandler
+	post /user/register(RegisterRequest) returns(RegisterResponse)
+
+	@handler LoginHandler
+	post /user/login(LoginRequest) returns (LoginResponse)
+
+	@handler UserDetailHandler
+	get /user/detail/:uuid(UserDetailRequest) returns (UserDetailResponse)
+
+	@handler EmailCodeHandler
+	post /user/emial/code(EmailCodeRequest) returns (EmailCodeResponse)
+}
