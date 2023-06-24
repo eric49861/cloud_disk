@@ -73,3 +73,128 @@ service clouddisk-api {
 	@handler EmailCodeHandler
 	post /user/emial/code(EmailCodeRequest) returns (EmailCodeResponse)
 }
+
+type(
+	FileUploadRequest {
+
+	}
+
+	FileUploadResponse{
+
+	}
+
+	FileDownloadRequest {
+
+	}
+
+	FileDownloadResponse{
+
+	}
+)
+
+@server(
+	group: resource
+	middleware: Auth
+)
+service clouddisk-api{
+
+	@handler FileUploadHandler
+	get /file/upload (FileUploadRequest) returns (FileUploadResponse)
+
+	@handler FileDownloadHandler
+	get /file/download/:uuid (FileDownloadRequest) returns (FileDownloadResponse)
+}
+
+
+// 文件列表的请求响应结构
+type(
+	FileListRequest{
+		ParentUUID string `path:"parent_uuid"`
+	}
+
+	FileListResponse{
+		FileList []*FileModel `json:"file_list"`
+		Count int `json:"count"`
+	}
+
+	FileModel{
+		UUID string `json:"uuid" gorm:"column:"uuid""`
+		CenterRepositoryUUID string `json:"center_repository_uuid" gorm:"center_repository_uuid"` //方便后面直接获取该资源的内容
+		Name string `json:"name" gorm:"name"`
+		Extension string `json:"extension" gorm:"extension"`
+		Size int `json:"size" gorm:"size"`
+	}
+)
+
+// 文件夹创建的请求响应结构
+type (
+
+	FolderCreateRequest{
+		ParentUUID string `json:"parent_uuid"`//文件夹父级文件夹的UUID
+		FolderName string `json:"folder_name"`//文件夹的名字
+	}
+
+	FolderCreateResponse{
+		UUID string `json:"uuid"`//新创建的文件夹的uuid
+	}
+)
+
+// 文件(夹)移动的请求响应结构
+type(
+
+	FileMoveRequest {
+		UUID string `json:"uuid"`//文件的uuid
+		ParentUUID string `json:"parent_uuid"`//文件的父级uuid
+	}
+
+	FileMoveResponse{
+		Msg string `json:"msg"`
+	}
+)
+
+// 文件(夹)的重命名
+type (
+
+	FileRenameRequest{
+		UUID string `json:"uuid"`//文件的uuid
+		Name string `json:"name"`//文件的新名称
+	}
+
+	FileRenameResponse{
+		Msg string `json:"msg"`
+	}
+)
+
+// 文件(夹)的删除
+type (
+
+	FileRemoveRequest{
+		UUID string `path:"uuid"`//文件的uuid
+	}
+
+	FileRemoveResponse{
+		Msg string `json:"msg"`
+	}
+)
+
+@server(
+	group: file
+	middleware: Auth
+)
+service clouddisk-api{
+	@handler FileListHandler
+	get file/list/:parent_uuid(FileListRequest) returns (FileListResponse)
+
+	@handler FolderCreateHandler
+	post file/create(FolderCreateRequest) returns (FolderCreateResponse)
+
+	@handler FileMoveHandler
+	post file/move(FileMoveRequest) returns (FileMoveResponse)
+
+	@handler FileRenameHandler
+	post file/rename(FileRenameRequest) returns (FileRenameResponse)
+
+	@handler FileRemoveHandler
+	delete file/remove/:uuid(FileRemoveRequest) returns (FileRemoveResponse)
+}
+
